@@ -7,7 +7,10 @@
  */
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.trim() || "http://localhost:3001";
+  (import.meta.env.VITE_API_BASE_URL?.trim() || "http://localhost:3001").replace(
+    /\/+$/,
+    ""
+  );
 
 class ApiError extends Error {
   constructor(message, { status, url, payload } = {}) {
@@ -23,7 +26,8 @@ class ApiError extends Error {
  * Performs a JSON fetch with robust error messages.
  */
 async function fetchJson(path, { method = "GET", signal } = {}) {
-  const url = `${API_BASE_URL}${path}`;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const url = `${API_BASE_URL}${normalizedPath}`;
   let res;
   try {
     res = await fetch(url, {
